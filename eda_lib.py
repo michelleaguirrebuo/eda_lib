@@ -7,6 +7,18 @@ Original file is located at
     https://colab.research.google.com/drive/110m2eXYUZ1eV5SS1DSkIVSTZFK9F4ZIz
 """
 
+'''
+Para importar:
+
+!git clone https://github.com/michelleaguirrebuo/eda_lib.git
+import sys
+sys.path.append('/content/eda_lib')
+import eda_lib
+'''
+
+
+
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -457,7 +469,7 @@ class EDA:
         else:
           return self.df.merge(df_other, on=columns, how=join_type)
 
-    def truncatedColumn(self, column:str, truncateAt:int=11, last:bool=False):
+    def addTruncatedColumn(self, column:str, truncateAt:int=11, last:bool=False):
         df=self.df[column].apply(lambda x: str(x))
         self.df[column+f'_{'last' if last else 'First'}{truncateAt}']=df.apply(lambda x: x[:truncateAt])
         return self.df[column+f'_{'last' if last else 'First'}{truncateAt}']
@@ -481,7 +493,7 @@ class EDA:
         else:
           self.df[columns]= (self.df[columns]-self.df[columns].min())/(self.df[columns].max()-self.df[columns].min())
 
-    def rangosPsicometrico(self, disp_metric: str = 'CV', divPerRange=12, printRanges=False, graph=False):
+    def rangosPsicometrico(self, disp_metric:str= 'CV', divPerRange=12, printRanges=False, graph=False):
       from seaborn import kdeplot
       from matplotlib.pyplot import figure,xlim,title
       c1=['radarpsychometriciniciativa', 'radarpsychometricinteligenciasocial','radarpsychometricinfluencia', 'radarpsychometricautonomia']
@@ -494,7 +506,10 @@ class EDA:
       ic=[]
       everything=[]
       for cuadrant in cuads:
-        ic.append(self.dispersion(cuadrant).sort_values(disp_metric).round().head(2).index)
+        if disp_metric:
+          ic.append(self.dispersion(cuadrant).sort_values(disp_metric).round().head(2).index)
+        else:
+          ic.append(self.dispersion(cuadrant).round().index)
       for label,cuadrant in enumerate(ic):
         print(labels[label])
         for column in cuadrant:
@@ -531,4 +546,17 @@ class EDA:
       BC = (g3 + 1) / (g2**2 + 3)
       df=DataFrame(BC).T
       df.columns=columns
+      return df
+
+    def concentracionRangosPsico(self, rangos:list):
+      from numpy import cumsum,nan
+      from pandas import DataFrame
+      cols=[i[0] for i in rangos]
+      rans=[list(list(zip(*i[1]))[0]) for i in rangos]
+      mx=max([len(ran) for ran in rans])
+      conc=[list(list(zip(*i[1]))[1]) for i in rangos]
+      df=DataFrame()
+      for idx,col in enumerate(cols):
+        df[col+'_rangos']=rans[idx] if (ln:=len(rans[idx]))==mx else rans[idx]+[nan for _ in range(mx-ln)]
+        df[col+'_concentración']=cumsum(conc[idx]) if (ln:=len(rans[idx]))==mx else cumsum(conc[idx]+[nan for _ in range(mx-ln)])
       return df
