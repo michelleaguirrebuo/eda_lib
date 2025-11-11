@@ -193,6 +193,9 @@ class EDA:
               print('File path not found')
           else:
               pass
+        cols=self.df.columns
+        for col in cols:
+            self.df.rename({col:col.lower().removeprefix('radarpsychometric').removesuffix('psychometric')})
 
     def visualize(self,columns:list or str=[],rows=5, head=True, tail=False):
         '''
@@ -489,11 +492,11 @@ class EDA:
     def rangosPsicometrico(self, disp_metric:str= 'CV', useN_fromCuad=2, divPerRange=12, printRanges=False, graph=False):
       from seaborn import kdeplot
       from matplotlib.pyplot import figure,xlim,title
-      c1=['radarpsychometriciniciativa', 'radarpsychometricinteligenciasocial','radarpsychometricinfluencia', 'radarpsychometricautonomia']
-      c2=['radarpsychometricdesarrollo', 'radarpsychometricorientacionservicio','radarpsychometricdiplomacia', 'radarpsychometricdisponibilidad']
-      c3=['radarpsychometricprecision', 'radarpsychometricatencionfocalizada','radarpsychometricpensamientoanalitico', 'radarpsychometricexctecnica']
-      c4=['radarpsychometricimplementacion', 'radarpsychometricexpeditividad','radarpsychometricdeterminacion', 'radarpsychometricagentecambio']
-      repna=['rpsychometric', 'epsychometric','ppsychometric', 'npsychometric', 'apsychometric']
+      c1=['iniciativa', 'inteligenciasocial','influencia', 'autonomia']
+      c2=['desarrollo', 'orientacionservicio','diplomacia', 'disponibilidad']
+      c3=['precision', 'atencionfocalizada','pensamientoanalitico', 'exctecnica']
+      c4=['implementacion', 'expeditividad','determinacion', 'agentecambio']
+      repna=['r', 'e','p', 'n', 'a']
       cuads=(c1,c2,c3,c4,repna)
       labels = {0:'C1', 1:'C2', 2:'C3', 3:'C4', 4:'Repna'}
       ic=[]
@@ -525,7 +528,21 @@ class EDA:
 
     def graficarPsicometrico(self, columns:list, group_col=None):
         radar=RadarHeatmap(self.df, columns=columns, group_col=group_col)
-        radar.plot(bw=0.2)
+        radar.plot(bw=0.2)}
+
+    def concentracionRangosPsico(self, rangos:list):
+      from numpy import cumsum,nan,diff
+      from pandas import DataFrame
+      cols=[i[0] for i in rangos]
+      rans=[list(list(zip(*i[1]))[0]) for i in rangos]
+      mx=max([len(ran) for ran in rans])
+      conc=[list(list(zip(*i[1]))[1]) for i in rangos]
+      df=DataFrame()
+      for idx,col in enumerate(cols):
+        df[col+'_rangos']=rans[idx] if (ln:=len(rans[idx]))==mx else rans[idx]+[nan for _ in range(mx-ln)]
+        df[col+'_concentración']=cumsum(conc[idx]) if (ln:=len(rans[idx]))==mx else cumsum(conc[idx]+[nan for _ in range(mx-ln)])
+        df[col+'_diff']=diff(df[col+'_concentración'], prepend=0)
+      return df
 
     def normalityTest(self,columns: list or str):
       from scipy.stats import shapiro
@@ -541,16 +558,4 @@ class EDA:
       df.columns=columns
       return df
 
-    def concentracionRangosPsico(self, rangos:list):
-      from numpy import cumsum,nan,diff
-      from pandas import DataFrame
-      cols=[i[0] for i in rangos]
-      rans=[list(list(zip(*i[1]))[0]) for i in rangos]
-      mx=max([len(ran) for ran in rans])
-      conc=[list(list(zip(*i[1]))[1]) for i in rangos]
-      df=DataFrame()
-      for idx,col in enumerate(cols):
-        df[col+'_rangos']=rans[idx] if (ln:=len(rans[idx]))==mx else rans[idx]+[nan for _ in range(mx-ln)]
-        df[col+'_concentración']=cumsum(conc[idx]) if (ln:=len(rans[idx]))==mx else cumsum(conc[idx]+[nan for _ in range(mx-ln)])
-        df[col+'_diff']=diff(df[col+'_concentración'], prepend=0)
-      return df
+
