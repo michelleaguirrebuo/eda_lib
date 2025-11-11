@@ -70,7 +70,7 @@ class RadarHeatmap:
         # Figure setup
         fig, ax = plt.subplots(subplot_kw={"projection": "polar"}, figsize=figsize)
         ax.set_xticks(theta[:-1])
-        lblObj=ax.set_xticklabels(features, fontsize=12)
+        ax.set_xticklabels(features, fontsize=12)
         ax.set_yticklabels([])
         ax.tick_params(axis='x', direction='out', pad=50)
 
@@ -139,9 +139,6 @@ class RadarHeatmap:
                 color="gray",
             )
         
-        for i, tick_label in enumerate(lblObj):
-        # Set rotation based on index, for example, increasing rotation
-            tick_label.set_rotation(i*(360/len(features)))
 
         # Legend only if groups exist
         if self.group_col and len(groups) > 1:
