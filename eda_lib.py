@@ -455,11 +455,9 @@ class EDA:
         self.df.to_csv('output'+self.file_name,index=False,sep=',',na_rep='N/A', encoding="utf-8", header=True)
 
     def merge(self, df_other, columns: list or str, join_type='left', keep=False, suffixes=('','')):
-        if keep:
-          self.merged = self.df.merge(df_other, on=columns, how=join_type,suffixes=suffixes)
-          return self.merged
-        else:
-          return self.df.merge(df_other, on=columns, how=join_type)
+        merged = self.df.merge(df_other, on=columns, how=join_type,suffixes=suffixes)
+        if keep: self.df=merged
+        return merged
 
     def addTruncatedColumn(self, column:str, truncateAt:int=11, last:bool=False):
         df=self.df[column].apply(lambda x: str(x))
