@@ -70,11 +70,11 @@ class RadarHeatmap:
         # Figure setup
         fig, ax = plt.subplots(subplot_kw={"projection": "polar"}, figsize=figsize)
         ax.set_xticks(theta[:-1])
-        ax.set_xticklabels(features, fontsize=12)
+        lblObj=ax.set_xticklabels(features, fontsize=12)
         ax.set_yticklabels([])
-        for i, tick_label in enumerate(ax.get_xticklabels()):
+        for i, tick_label in enumerate(lblObj):
         # Set rotation based on index, for example, increasing rotation
-            tick_label.set_rotation(360/(i+1))
+            tick_label.set_rotation(i*(360/len(features))
         ax.tick_params(axis='x', direction='out', pad=50)
 
         # Colormaps for different groups
