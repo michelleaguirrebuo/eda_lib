@@ -165,8 +165,6 @@ class RadarHeatmap:
             plt.legend(
                 loc="upper right", bbox_to_anchor=(1.25, 1.1), title=self.group_col
             )
-
-        plt.colorbar(ax.collections[0], label="Density (normalized)", shrink=0.8)
         
         plt.tight_layout()
         plt.show()
