@@ -69,11 +69,11 @@ class RadarHeatmap:
 
         # Figure setup
         fig, ax = plt.subplots(subplot_kw={"projection": "polar"}, figsize=figsize)
-        #ax.set_xticks(theta[:-1])
-        #ax.set_xticklabels(features, fontsize=12)
+        ax.set_xticks(theta[:-1])
+        ax.set_xticklabels(features, fontsize=12)
         ax.set_yticklabels([])
         ax.set_thetagrids([])
-        #ax.tick_params(axis='x', direction='out', pad=50)
+        ax.tick_params(axis='x', direction='out', pad=50)
 
         # Colormaps for different groups
         cmaps = ["plasma", "viridis", "magma", "cividis", "inferno"]
@@ -130,23 +130,7 @@ class RadarHeatmap:
 
             # Add min–max labels per feature
         for i, feature in enumerate(features):
-                angle = theta[i]
-                # Convert to degrees for rotation
-                angle_deg = np.degrees(angle)
-                ha = "left" if 0 <= angle_deg <= 180 else "right"
-                rotation = angle_deg if 0 <= angle_deg <= 180 else angle_deg + 180
-            
-                ax.text(
-                    angle,
-                    1.8,  # increase radius to push labels outward
-                    feature,
-                    ha=ha,
-                    va="center",
-                    fontsize=10,        
-                    rotation=rotation,
-                    rotation_mode="anchor",
-                )
-
+                data = self.df[feature]
                 ax.text( theta[i], 1.10, f"{data.min():.2f}\n|\n{data.max():.2f}", ha="center", va="center", fontsize=8, color="gray", )
 
         
