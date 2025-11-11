@@ -136,7 +136,7 @@ class RadarHeatmap:
             
                 ax.text(
                     angle,
-                    1.2,  # increase radius to push labels outward
+                    1.25,  # increase radius to push labels outward
                     feature,
                     ha=ha,
                     va="center",
@@ -144,6 +144,8 @@ class RadarHeatmap:
                     rotation_mode="anchor",
                     fontsize=10,
                 )
+
+                ax.text( theta[i], 1.05, f"{data.min():.2f}\n|\n{data.max():.2f}", ha="center", va="center", fontsize=8, color="gray", )
 
         
 
