@@ -528,7 +528,7 @@ class EDA:
 
     def graficarPsicometrico(self, columns:list, group_col=None):
         radar=RadarHeatmap(self.df, columns=columns, group_col=group_col)
-        radar.plot(bw=0.2)}
+        radar.plot(bw=0.2)
 
     def concentracionRangosPsico(self, rangos:list):
       from numpy import cumsum,nan,diff
