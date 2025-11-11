@@ -72,7 +72,10 @@ class RadarHeatmap:
         ax.set_xticks(theta[:-1])
         ax.set_xticklabels(features, fontsize=12)
         ax.set_yticklabels([])
-        ax.tick_params(axis='x', labelrotation=90, direction='out', pad=50)
+        for i, tick_label in enumerate(ax.get_xticklabels()):
+        # Set rotation based on index, for example, increasing rotation
+            tick_label.set_rotation(360/(i+1))
+        ax.tick_params(axis='x' direction='out', pad=50)
 
         # Colormaps for different groups
         cmaps = ["plasma", "viridis", "magma", "cividis", "inferno"]
