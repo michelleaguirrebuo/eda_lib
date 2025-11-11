@@ -483,7 +483,7 @@ class EDA:
         else:
           self.df[columns]= (self.df[columns]-self.df[columns].min())/(self.df[columns].max()-self.df[columns].min())
 
-    def rangosPsicometrico(self, disp_metric:str= 'CV', divPerRange=12, printRanges=False, graph=False):
+    def rangosPsicometrico(self, disp_metric:str= 'CV', useN_fromCuad=2, divPerRange=12, printRanges=False, graph=False):
       from seaborn import kdeplot
       from matplotlib.pyplot import figure,xlim,title
       c1=['radarpsychometriciniciativa', 'radarpsychometricinteligenciasocial','radarpsychometricinfluencia', 'radarpsychometricautonomia']
@@ -497,7 +497,7 @@ class EDA:
       everything=[]
       for cuadrant in cuads:
         if disp_metric:
-          ic.append(self.dispersion(cuadrant).sort_values(disp_metric).round().head(2).index)
+          ic.append(self.dispersion(cuadrant).sort_values(disp_metric).round().head(useN_fromCuad).index)
         else:
           ic.append(self.dispersion(cuadrant).round().index)
       for label,cuadrant in enumerate(ic):
