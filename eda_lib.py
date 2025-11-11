@@ -154,7 +154,15 @@ class RadarHeatmap:
             plt.legend(
                 loc="upper right", bbox_to_anchor=(1.25, 1.1), title=self.group_col
             )
-        
+        fig.colorbar(
+            ax.collections[0],
+            ax=ax,
+            pad=0.15,
+            fraction=0.03,
+            shrink=0.8,
+            label="Density (normalized)"
+        )
+
         plt.tight_layout()
         plt.show()
 
