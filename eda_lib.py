@@ -142,7 +142,9 @@ class RadarHeatmap:
                     feature,
                     ha=ha,
                     va="center",
-                    fontsize=10,
+                    fontsize=10,        
+                    rotation=rotation,
+                    rotation_mode="anchor",
                 )
 
                 ax.text( theta[i], 1.10, f"{data.min():.2f}\n|\n{data.max():.2f}", ha="center", va="center", fontsize=8, color="gray", )
