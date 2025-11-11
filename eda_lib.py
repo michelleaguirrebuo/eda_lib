@@ -138,12 +138,10 @@ class RadarHeatmap:
             
                 ax.text(
                     angle,
-                    1.25,  # increase radius to push labels outward
+                    1.8,  # increase radius to push labels outward
                     feature,
                     ha=ha,
                     va="center",
-                    rotation=rotation,
-                    rotation_mode="anchor",
                     fontsize=10,
                 )
 
