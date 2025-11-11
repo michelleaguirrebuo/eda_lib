@@ -443,10 +443,10 @@ class EDA:
         self.df[column].fillna(value,inplace=True)
 
     def propByGroup(self, columns:list or str, ignore_nans=False):
-        return self.df.groupby(column).value_counts(normalize=True,dropna=ignore_nans)
+        return self.df.groupby(columns).value_counts(normalize=True,dropna=ignore_nans)
 
     def countByGroup(self, columns:list or str, ignore_nans=False):
-        return self.df.groupby(column).value_counts(dropna=ignore_nans)
+        return self.df.groupby(columns).value_counts(dropna=ignore_nans)
 
     def createExcel(self):
         self.df.to_excel('output'+self.file_name,index=False)
@@ -454,9 +454,9 @@ class EDA:
     def createCSV(self):
         self.df.to_csv('output'+self.file_name,index=False,sep=',',na_rep='N/A', encoding="utf-8", header=True)
 
-    def merge(self, df_other, columns: list or str, join_type='left', keep=False):
+    def merge(self, df_other, columns: list or str, join_type='left', keep=False, suffixes=('','')):
         if keep:
-          self.merged = self.df.merge(df_other, on=columns, how=join_type)
+          self.merged = self.df.merge(df_other, on=columns, how=join_type,suffixes=suffixes)
           return self.merged
         else:
           return self.df.merge(df_other, on=columns, how=join_type)
