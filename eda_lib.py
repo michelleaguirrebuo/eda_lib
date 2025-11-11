@@ -126,18 +126,25 @@ class RadarHeatmap:
                 label=str(group),
             )
 
-        # Add min–max labels per feature
+            # Add min–max labels per feature
         for i, feature in enumerate(features):
-            data = self.df[feature]
-            ax.text(
-                theta[i],
-                1.1,
-                f"{data.min():.2f}\n|\n{data.max():.2f}",
-                ha="center",
-                va="center",
-                fontsize=8,
-                color="gray",
-            )
+                angle = theta[i]
+                # Convert to degrees for rotation
+                angle_deg = np.degrees(angle)
+                ha = "left" if 0 <= angle_deg <= 180 else "right"
+                rotation = angle_deg if 0 <= angle_deg <= 180 else angle_deg + 180
+            
+                ax.text(
+                    angle,
+                    1.2,  # increase radius to push labels outward
+                    feature,
+                    ha=ha,
+                    va="center",
+                    rotation=rotation,
+                    rotation_mode="anchor",
+                    fontsize=10,
+                )
+
         
 
         # Legend only if groups exist
