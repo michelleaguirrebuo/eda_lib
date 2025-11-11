@@ -70,7 +70,7 @@ class RadarHeatmap:
         # Figure setup
         fig, ax = plt.subplots(subplot_kw={"projection": "polar"}, figsize=figsize)
         ax.set_xticks(theta[:-1])
-        ax.set_xticklabels(features, fontsize=12)
+        #ax.set_xticklabels(features, fontsize=12)
         ax.set_yticklabels([])
         ax.tick_params(axis='x', direction='out', pad=50)
 
