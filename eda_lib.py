@@ -195,7 +195,7 @@ class EDA:
               pass
         cols=self.df.columns
         for col in cols:
-            self.df.rename({col:col.lower().removeprefix('radarpsychometric').removesuffix('psychometric')})
+            self.df.rename({col:col.lower().removeprefix('radarpsychometric').removesuffix('psychometric')},axis=1,inplace=True)
 
     def visualize(self,columns:list or str=[],rows=5, head=True, tail=False):
         '''
