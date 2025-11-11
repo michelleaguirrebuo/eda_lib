@@ -539,7 +539,7 @@ class EDA:
       return df
 
     def concentracionRangosPsico(self, rangos:list):
-      from numpy import cumsum,nan
+      from numpy import cumsum,nan,diff
       from pandas import DataFrame
       cols=[i[0] for i in rangos]
       rans=[list(list(zip(*i[1]))[0]) for i in rangos]
@@ -549,4 +549,5 @@ class EDA:
       for idx,col in enumerate(cols):
         df[col+'_rangos']=rans[idx] if (ln:=len(rans[idx]))==mx else rans[idx]+[nan for _ in range(mx-ln)]
         df[col+'_concentración']=cumsum(conc[idx]) if (ln:=len(rans[idx]))==mx else cumsum(conc[idx]+[nan for _ in range(mx-ln)])
+        df[col+'_diff']=diff(df[col+'_concentración'], prepend=0)
       return df
