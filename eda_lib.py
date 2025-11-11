@@ -456,7 +456,7 @@ class EDA:
 
     def merge(self, df_other, columns: list or str, join_type='left', keep=False, suffixes=('','')):
         merged = self.df.merge(df_other, on=columns, how=join_type,suffixes=suffixes)
-        if keep: self.df=merged
+        if keep: self.df=merged 
         return merged
 
     def addTruncatedColumn(self, column:str, truncateAt:int=11, last:bool=False):
