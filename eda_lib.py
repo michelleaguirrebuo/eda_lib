@@ -126,15 +126,6 @@ class RadarHeatmap:
                 alpha=alpha,
                 label=str(group),
             )
-        # After creating the mesh (ax.pcolormesh)
-        cbar = fig.colorbar(
-            ax.collections[0],
-            ax=ax,
-            pad=0.15,           # distance between plot and colorbar
-            fraction=0.03,      # width of the colorbar
-            shrink=0.8,         # vertical shrink factor
-            label="Density (normalized)"
-        )
 
 
             # Add min–max labels per feature
