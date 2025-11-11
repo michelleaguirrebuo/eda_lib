@@ -75,7 +75,7 @@ class RadarHeatmap:
         for i, tick_label in enumerate(ax.get_xticklabels()):
         # Set rotation based on index, for example, increasing rotation
             tick_label.set_rotation(360/(i+1))
-        ax.tick_params(axis='x' direction='out', pad=50)
+        ax.tick_params(axis='x', direction='out', pad=50)
 
         # Colormaps for different groups
         cmaps = ["plasma", "viridis", "magma", "cividis", "inferno"]
