@@ -74,7 +74,7 @@ class RadarHeatmap:
         ax.set_yticklabels([])
         for i, tick_label in enumerate(lblObj):
         # Set rotation based on index, for example, increasing rotation
-            tick_label.set_rotation(i*(360/len(features))
+            tick_label.set_rotation(i*(360/len(features)))
         ax.tick_params(axis='x', direction='out', pad=50)
 
         # Colormaps for different groups
