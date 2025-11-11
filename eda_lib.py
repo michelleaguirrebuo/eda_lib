@@ -72,11 +72,6 @@ class RadarHeatmap:
         ax.set_xticks(theta[:-1])
         lblObj=ax.set_xticklabels(features, fontsize=12)
         ax.set_yticklabels([])
-        fig.canvas.draw()
-        for i, tick_label in enumerate(lblObj):
-        # Set rotation based on index, for example, increasing rotation
-            tick_label.set_rotation(i*(360/len(features)))
-            tick_label.set_ha("right")
         ax.tick_params(axis='x', direction='out', pad=50)
 
         # Colormaps for different groups
@@ -125,7 +120,7 @@ class RadarHeatmap:
                 T,
                 R,
                 Z,
-                cmap=cmaps[g_i % len(cmaps)],
+                cmap=cmaps[0],
                 shading="auto",
                 alpha=alpha,
                 label=str(group),
@@ -143,6 +138,10 @@ class RadarHeatmap:
                 fontsize=8,
                 color="gray",
             )
+        
+        for i, tick_label in enumerate(lblObj):
+        # Set rotation based on index, for example, increasing rotation
+            tick_label.set_rotation(i*(360/len(features)))
 
         # Legend only if groups exist
         if self.group_col and len(groups) > 1:
@@ -151,6 +150,7 @@ class RadarHeatmap:
             )
 
         plt.colorbar(ax.collections[0], label="Density (normalized)", shrink=0.8)
+        
         plt.tight_layout()
         plt.show()
 
