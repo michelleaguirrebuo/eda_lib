@@ -72,7 +72,7 @@ class RadarHeatmap:
         #ax.set_xticks(theta[:-1])
         #ax.set_xticklabels(features, fontsize=12)
         ax.set_yticklabels([])
-        ax.tick_params(axis='x', direction='out', pad=50)
+        #ax.tick_params(axis='x', direction='out', pad=50)
 
         # Colormaps for different groups
         cmaps = ["plasma", "viridis", "magma", "cividis", "inferno"]
@@ -145,7 +145,7 @@ class RadarHeatmap:
                     fontsize=10,
                 )
 
-                ax.text( theta[i], 1.05, f"{data.min():.2f}\n|\n{data.max():.2f}", ha="center", va="center", fontsize=8, color="gray", )
+                ax.text( theta[i], 1.10, f"{data.min():.2f}\n|\n{data.max():.2f}", ha="center", va="center", fontsize=8, color="gray", )
 
         
 
