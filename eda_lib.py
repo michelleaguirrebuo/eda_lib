@@ -72,6 +72,7 @@ class RadarHeatmap:
         ax.set_xticks(theta[:-1])
         lblObj=ax.set_xticklabels(features, fontsize=12)
         ax.set_yticklabels([])
+        fig.canvas.draw()
         for i, tick_label in enumerate(lblObj):
         # Set rotation based on index, for example, increasing rotation
             tick_label.set_rotation(i*(360/len(features)))
