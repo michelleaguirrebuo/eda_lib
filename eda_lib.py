@@ -5,7 +5,7 @@ Para importar:
 !git clone https://github.com/michelleaguirrebuo/eda_lib.git
 import sys
 sys.path.append('/content/eda_lib')
-import eda_lib
+from eda_lib import EDA
 '''
 
 
@@ -18,7 +18,7 @@ from scipy.stats import gaussian_kde
 
 #Esta clase es solo para graficar
 class RadarHeatmap:
-    def __init__(self, df: pd.DataFrame, columns: list, group_col: str = None):
+    def __init__(self, df: pd.DataFrame, columns: list, group_col: str = None, ranges=None):
         """
         A radar-style heatmap showing feature-wise density distributions.
 
@@ -35,6 +35,7 @@ class RadarHeatmap:
         self.df = df.copy()
         self.columns = columns
         self.group_col = group_col if group_col in df.columns else None
+        self.ranges=ranges
 
         # Validate column existence
         missing_cols = [c for c in columns if c not in df.columns]
@@ -129,24 +130,18 @@ class RadarHeatmap:
 
             # Add min–max labels per feature
         for i, feature in enumerate(features):
+                txt= str(self.ranges) if self.ranges else f"{data.min():.2f}\n|\n{data.max():.2f}"
                 data = self.df[feature]
-                ax.text( theta[i], 1.10, f"{data.min():.2f}\n|\n{data.max():.2f}", ha="center", va="center", fontsize=8, color="gray", )
+                ax.text( theta[i], 1.10, txt, ha="center", va="center", fontsize=8, color="gray", )
 
-        
+
 
         # Legend only if groups exist
         if self.group_col and len(groups) > 1:
             plt.legend(
                 loc="upper right", bbox_to_anchor=(1.25, 1.1), title=self.group_col
             )
-        fig.colorbar(
-            ax.collections[0],
-            ax=ax,
-            pad=0.15,
-            fraction=0.03,
-            shrink=0.8,
-            label="Density (normalized)"
-        )
+
 
         plt.tight_layout()
         plt.show()
@@ -353,7 +348,7 @@ class EDA:
         return self.df[columns].unique() if type(columns)==str else [(col,self.df[col].unique() )for col in columns]
 
 
-    def labelEncoding(self, column:str, ignore_nans=True):
+    def labelEncoding(self, column:str, ignore_nans=True, customOrder:list=None):
         '''
         ### Description
         Encodes unique values of a column as unique sequential integer values
@@ -361,11 +356,15 @@ class EDA:
         - column: Name of a column in string format
         - ignore_nans: True by default. Consider NaNs unique values of the column
         '''
-        unq=self.df[column].unique() if ignore_nans else self.df[~self.df[column].isna()][column].unique()
+        from numpy import nan
+        if not customOrder:
+          unq=self.df[column].unique() if ignore_nans else self.df[~self.df[column].isna()][column].unique()
+        else:
+          unq=customOrder+[nan] if not ignore_nans else customOrder
         dct={u:idx for idx,u in enumerate(unq)}
         self.df[column+'_encoded'] = self.df[column].map(dct)
 
-    def oneHotEncoding(self, column:str, ignore_nans=True):
+    def oneHotEncoding(self, column:str, ignore_nans=True, customOrder:list=None):
         '''
         ### Description
         Encodes unique values of a column as binary values in sequential columns
@@ -374,8 +373,12 @@ class EDA:
         - column: Name of a column in string format
         - ignore_nans: True by default. Consider NaNs unique values of the column
         '''
-        unq=self.df[column].unique() if ignore_nans else self.df[~self.df[column].isna()][column].unique()
-        for u in unq:
+        from numpy import nan
+        if not customOrder:
+          unq=self.df[column].unique() if ignore_nans else self.df[~self.df[column].isna()][column].unique()
+        else:
+          unq=customOrder+[nan] if not ignore_nans else customOrder        
+          for u in unq:
             dct={ui:(1 if ui==u else 0) for ui in unq}
             self.df[u]=self.df[column].map(dct)
 
@@ -462,7 +465,7 @@ class EDA:
 
     def merge(self, df_other, columns: list or str, join_type='left', keep=False, suffixes=('','')):
         merged = self.df.merge(df_other, on=columns, how=join_type,suffixes=suffixes)
-        if keep: self.df=merged 
+        if keep: self.df=merged
         return merged
 
     def addTruncatedColumn(self, column:str, truncateAt:int=11, last:bool=False):
@@ -489,7 +492,7 @@ class EDA:
         else:
           self.df[columns]= (self.df[columns]-self.df[columns].min())/(self.df[columns].max()-self.df[columns].min())
 
-    def rangosPsicometrico(self, disp_metric:str= 'CV', useN_fromCuad=2, divPerRange=12, printRanges=False, graph=False):
+    def rangosPsicometrico(self, setdf=False, df=None, disp_metric:str= 'CV', useN_fromCuad=5, divs=12, printRanges=False, kde=False, spiderweb=False):
       from seaborn import kdeplot
       from matplotlib.pyplot import figure,xlim,title
       c1=['iniciativa', 'inteligenciasocial','influencia', 'autonomia']
@@ -498,7 +501,7 @@ class EDA:
       c4=['implementacion', 'expeditividad','determinacion', 'agentecambio']
       repna=['r', 'e','p', 'n', 'a']
       cuads=(c1,c2,c3,c4,repna)
-      labels = {0:'C1', 1:'C2', 2:'C3', 3:'C4', 4:'Repna'}
+      labels = {0:'Cuadrante 1', 1:'Cuadrante 2', 2:'Cuadrante 3', 3:'Cuadrante 4', 4:'Repna'}
       ic=[]
       everything=[]
       for cuadrant in cuads:
@@ -507,31 +510,28 @@ class EDA:
         else:
           ic.append(self.dispersion(cuadrant).round().index)
       for label,cuadrant in enumerate(ic):
-        print(labels[label])
+        if printRanges:print(labels[label])
         for column in cuadrant:
-          df=self.df[~self.df[column].isna()][column]
-          step=int((df.max()-df.min())//divPerRange)
+          x=df.loc[~df[column].isna(),column] if setdf else self.df.loc[~self.df[column].isna(),column]
+          step=int(100//divs)
           sums=[]
-          for i in range(int(df.min()),int(df.max()),step):
-            upper_b=i+step if i+step<df.max() else int(df.max()+1)
-            bit1=((df.value_counts().index<(upper_b)))
-            bit2=df.value_counts().index>=i
-            idxs= [b1 & b2 for b1,b2 in zip(bit1,bit2)]
-            sums.append(((i,upper_b-1),((((df.value_counts().loc[idxs]))/df.value_counts().sum()*100).sum())))
+          for i in range(0,100,step):
+            upper_b=i+step if i+step<100 else 101
+            counts=x.value_counts(normalize=True)*100
+            consult=counts.loc[(counts.index<upper_b) & (counts.index>=i)]
+            sums.append(((i,upper_b-1),(consult.sum())))
           sums2=[i[1].round(1) for i in sums]
           idxs=[i[0] for i in sums]
-          print(column,index:=max(sums2),idxs[sums2.index(index)])
-          if graph:figure(),kdeplot(self.df[column],bw_adjust=0.8),title(column),xlim(0,100)
-          if printRanges:print(sums)
+          if kde:figure(),kdeplot(x,bw_adjust=0.8),title(column),xlim(0,100)
+          if printRanges:
+            print(column,index:=max(sums2),idxs[sums2.index(index)])
           everything.append((column,sums))
+      if spiderweb:
+        self.graficarPsicometrico([col for cuadrante in cuads for col in cuadrante])
       return everything
 
-    def graficarPsicometrico(self, columns:list, group_col=None):
-        radar=RadarHeatmap(self.df, columns=columns, group_col=group_col)
-        radar.plot(bw=0.2)
-
     def concentracionRangosPsico(self, rangos:list):
-      from numpy import cumsum,nan,diff
+      from numpy import cumsum,nan,diff,round
       from pandas import DataFrame
       cols=[i[0] for i in rangos]
       rans=[list(list(zip(*i[1]))[0]) for i in rangos]
@@ -542,13 +542,47 @@ class EDA:
         df[col+'_rangos']=rans[idx] if (ln:=len(rans[idx]))==mx else rans[idx]+[nan for _ in range(mx-ln)]
         df[col+'_concentración']=cumsum(conc[idx]) if (ln:=len(rans[idx]))==mx else cumsum(conc[idx]+[nan for _ in range(mx-ln)])
         df[col+'_diff']=diff(df[col+'_concentración'], prepend=0)
+        df[col+'_concentración'],df[col+'_diff']=df[col+'_concentración'].round(2),df[col+'_diff'].round(2)
       return df
+
+    def concentracionDiferencialPsico(self, performanceCol:str, categories:list or tuple, divs=12, spiderweb=False, plot=False):
+        from pandas import DataFrame,concat
+        from matplotlib.pyplot import figure,xlim,title,xticks,figlegend, plot
+        rangos= [self.rangosPsicometrico(df=self.df[self.df[performanceCol]==categories[0]],divs=divs,setdf=True),
+                 self.rangosPsicometrico(df=self.df[self.df[performanceCol]==categories[1]],divs=divs,setdf=True)]
+        conc= [self.concentracionRangosPsico(rangos[0]),self.concentracionRangosPsico(rangos[1])]
+        x= concat([conc[0].loc[:,conc[0].columns.str.contains('diff')],conc[1].loc[:,conc[1].columns.str.contains('diff')]],axis=0)
+        x['cat']=[categories[0]]*len(conc[0])+[categories[1]]*len(conc[1])
+        df=DataFrame()
+        diffCols=[]
+        cols=[i[0] for i in rangos[0]]
+        for idx,col in enumerate(cols):
+          df[col+'_rangos']=conc[0].loc[:,col+'_rangos']
+          y= [r[0] for r in df[col+'_rangos']]
+          df[col+'_diff']=abs(conc[0].loc[:,col+'_diff']-conc[1].loc[:,col+'_diff'])
+          if plot:
+            figure()
+            plot(y,x.loc[x['cat']==categories[0],col+'_diff'], c='r', label=categories[0])
+            plot(y,x.loc[x['cat']==categories[1],col+'_diff'], c='b', label=categories[1])
+            xticks(y,conc[0].loc[:,col+'_rangos'],rotation=90)
+            title(col)
+            xlim(-1,91)
+            figlegend()
+          diffCols.append(col+'_diff')
+        if spiderweb:
+          radar=RadarHeatmap(df=df,columns=diffCols, ranges=(0,100))
+          radar.plot(bw=0.1)
+        return df
+
+    def graficarPsicometrico(self, columns:list): 
+        radar=RadarHeatmap(self.df[~self.df['perfil'].isna()] , columns=columns)
+        radar.plot(bw=0.1)
 
     def normalityTest(self,columns: list or str):
       from scipy.stats import shapiro
       return shapiro(self.df[columns].T,axis=1).statistic
 
-    def bimodalityCheck(self,columns: list or str):
+    def bimodalityTest(self,columns: list or str):
       from scipy.stats import kurtosis
       from pandas import DataFrame
       g2 = self.df[columns].skew()
@@ -557,5 +591,4 @@ class EDA:
       df=DataFrame(BC).T
       df.columns=columns
       return df
-
 
