@@ -235,7 +235,7 @@ class EDA:
         '''
         return self.df.index
 
-    def reindex(self,drop: bool =True):
+    def reset_index(self,drop_index:bool=True):
         '''
         ### Description
         Resets index of the dataframe inplace.
@@ -243,7 +243,7 @@ class EDA:
         - drop: True by default. Bool indicating whether to
         drop the current index
         '''
-        self.df.reset_index(inplace=True,drop=drop)
+        self.df.reset_index(inplace=True,drop=drop_index)
 
     def info(self, columns: list or str=[]):
         '''
@@ -255,7 +255,7 @@ class EDA:
         df=self.df[columns] if columns else self.df
         return df.info()
 
-    def missingValsProportion(self, columns: list or str=[]):
+    def missing_proportion(self, columns: list or str=[]):
         '''
         ### Description
         Returns proportion of missing values over determined columns
@@ -265,7 +265,7 @@ class EDA:
         df=self.df[columns] if columns else self.df
         return df.isna().sum()/self.df.shape[0]*100
 
-    def duplicateValsProportion(self, columns: list or str=[]):
+    def duplicate_proportion(self, columns: list or str=[]):
         '''
         ### Description
         Return proportion of duplicated values over given column or
@@ -281,7 +281,7 @@ class EDA:
         else:
           return df.duplicated().sum()/self.df.shape[0]*100
 
-    def duplicateValsCount(self, columns: list or str=[]):
+    def duplicates_count(self, columns: list or str=[]):
         '''
         ### Description
         Return proportion of duplicated values over given column or
@@ -297,7 +297,7 @@ class EDA:
         else:
           return df.duplicated().sum()
 
-    def duplicateVals(self, columns: list or str=[]):
+    def duplicates(self, columns: list or str=[]):
         '''
         ### Description
         Return  duplicated values over given column or
@@ -313,7 +313,7 @@ class EDA:
         else:
           return df.duplicated(subset=columns,keep=False)
 
-    def contarValsUnicos(self, columns:list or str=[], ignore_nans: bool=False):
+    def value_counts(self, columns:list or str=[], ignore_nans: bool=False):
         '''
         ### Description
         Returns unique value counts by column
@@ -328,7 +328,7 @@ class EDA:
           for col in columns:
             print(self.df[col].value_counts(dropna=ignore_nans))
 
-    def contarProporcionValsUnicos(self, columns:list or str=[], ignore_nans: bool=False):
+    def uniques_proportion(self, columns:list or str=[], ignore_nans: bool=False):
         '''
         ### Description
         Returns unique value proportions by column
@@ -344,7 +344,7 @@ class EDA:
             print(self.df[col].value_counts(normalize=True,dropna=ignore_nans)*100)
 
 
-    def valsUnicos(self, columns:list or str=[]):
+    def uniques(self, columns:list or str=[]):
         return self.df[columns].unique() if type(columns)==str else [(col,self.df[col].unique() )for col in columns]
 
 
@@ -377,7 +377,7 @@ class EDA:
         if not customOrder:
           unq=self.df[column].unique() if ignore_nans else self.df[~self.df[column].isna()][column].unique()
         else:
-          unq=customOrder+[nan] if not ignore_nans else customOrder        
+          unq=customOrder+[nan] if not ignore_nans else customOrder
           for u in unq:
             dct={ui:(1 if ui==u else 0) for ui in unq}
             self.df[u]=self.df[column].map(dct)
@@ -428,7 +428,7 @@ class EDA:
     def dropRows(self, rows:list=[]):
         self.df.drop(rows, axis=0, inplace=True)
 
-    def dropDups(self, columns:list):
+    def dropDuplicates(self, columns:list):
         self.df.drop_duplicates(subset=columns, inplace=True)
 
     def dropNaNs(self, columns:list or str, na=None):
@@ -451,22 +451,11 @@ class EDA:
     def fillNaNs(self, column:str, value):
         self.df[column].fillna(value,inplace=True)
 
-    def propByGroup(self, columns:list or str, ignore_nans=False):
+    def proportionByGroup(self, columns:list or str, ignore_nans=False):
         return self.df.groupby(columns).value_counts(normalize=True,dropna=ignore_nans)
 
     def countByGroup(self, columns:list or str, ignore_nans=False):
         return self.df.groupby(columns).value_counts(dropna=ignore_nans)
-
-    def createExcel(self):
-        self.df.to_excel('output'+self.file_name,index=False)
-
-    def createCSV(self):
-        self.df.to_csv('output'+self.file_name,index=False,sep=',',na_rep='N/A', encoding="utf-8", header=True)
-
-    def merge(self, df_other, columns: list or str, join_type='left', keep=False, suffixes=('','')):
-        merged = self.df.merge(df_other, on=columns, how=join_type,suffixes=suffixes)
-        if keep: self.df=merged
-        return merged
 
     def addTruncatedColumn(self, column:str, truncateAt:int=11, last:bool=False):
         df=self.df[column].apply(lambda x: str(x))
@@ -492,7 +481,7 @@ class EDA:
         else:
           self.df[columns]= (self.df[columns]-self.df[columns].min())/(self.df[columns].max()-self.df[columns].min())
 
-    def rangosPsicometrico(self, setdf=False, df=None, disp_metric:str= 'CV', useN_fromCuad=5, divs=12, printRanges=False, kde=False, spiderweb=False):
+    def rangosPsicometrico(self,df=None,set_df=False,nec:str='perfil', disp_metric:str= 'CV', varsFromCuadrant=5, divs=12, printRanges=False, kde=False, spiderweb=False, ):
       from seaborn import kdeplot
       from matplotlib.pyplot import figure,xlim,title
       c1=['iniciativa', 'inteligenciasocial','influencia', 'autonomia']
@@ -506,14 +495,14 @@ class EDA:
       everything=[]
       for cuadrant in cuads:
         if disp_metric:
-          ic.append(self.dispersion(cuadrant).sort_values(disp_metric).round().head(useN_fromCuad).index)
+          ic.append(self.dispersion(cuadrant).sort_values(disp_metric).round().head(varsFromCuadrant).index)
         else:
           ic.append(self.dispersion(cuadrant).round().index)
-      for label,cuadrant in enumerate(ic):
-        if printRanges:print(labels[label])
+      for var,cuadrant in enumerate(ic):
+        if printRanges:print(labels[var])
         for column in cuadrant:
-          x=df.loc[~df[column].isna(),column] if setdf else self.df.loc[~self.df[column].isna(),column]
-          step=int(100//divs)
+          x=self.df.loc[~self.df[column].isna(),column] if not set_df else df.loc[~df[column].isna(),column]
+          step=int(100/divs)
           sums=[]
           for i in range(0,100,step):
             upper_b=i+step if i+step<100 else 101
@@ -527,8 +516,9 @@ class EDA:
             print(column,index:=max(sums2),idxs[sums2.index(index)])
           everything.append((column,sums))
       if spiderweb:
-        self.graficarPsicometrico([col for cuadrante in cuads for col in cuadrante])
+        self.graficarPsicometrico([col for cuadrante in cuads for col in cuadrante],nec)
       return everything
+
 
     def concentracionRangosPsico(self, rangos:list):
       from numpy import cumsum,nan,diff,round
@@ -545,11 +535,66 @@ class EDA:
         df[col+'_concentración'],df[col+'_diff']=df[col+'_concentración'].round(2),df[col+'_diff'].round(2)
       return df
 
-    def concentracionDiferencialPsico(self, performanceCol:str, categories:list or tuple, divs=12, spiderweb=False, plot=False):
+    def concentracionDiferencialGlobal(self, performanceCol:str, categories:list ,nec:str='perfil', divs=12, spiderweb=False, plots=False):
+      from pandas import DataFrame,concat
+      from matplotlib.pyplot import figure,xlim,title,xticks,figlegend, plot,title
+      c1=['iniciativa', 'inteligenciasocial','influencia', 'autonomia']
+      c2=['desarrollo', 'orientacionservicio','diplomacia', 'disponibilidad']
+      c3=['precision', 'atencionfocalizada','pensamientoanalitico', 'exctecnica']
+      c4=['implementacion', 'expeditividad','determinacion', 'agentecambio']
+      repna=['r', 'e','p', 'n', 'a']
+      cuads=(c1,c2,c3,c4,repna)
+      df=self.df.loc[((self.df[performanceCol]==categories[0])|(self.df[performanceCol]==categories[1])),:]
+      N=len(df)
+      cat1= df.loc[(df[performanceCol]==categories[0])]
+      cat2= df.loc[(df[performanceCol]==categories[1])]
+      result=DataFrame()
+      step=int(100/divs)
+      for cuadrant in cuads:
+        for variable in cuadrant:
+          aux = []
+          for i in range(0, 100, step):
+              lb = i
+              ub = i + step if i + step < 100 else 101
+              ran = (lb, ub - 1)
+              totCon = df.loc[(df[variable]>=lb)&(df[variable]<ub), variable].count() / N * 100
+              cat1Con = cat1.loc[(cat1[variable]>=lb)&(cat1[variable]<ub), variable].count() / N * 100
+              cat2Con = cat2.loc[(cat2[variable]>=lb)&(cat2[variable]<ub), variable].count() / N * 100
+              diffCon = abs(cat1Con - cat2Con)
+              aux.append([ran, totCon, cat1Con, cat2Con, diffCon])
+          tmp = DataFrame(
+              aux,
+              columns=[
+                  f"range_{variable}",
+                  f"total_con_{variable}",
+                  f"cat1_con_{variable}",
+                  f"cat2_con_{variable}",
+                  f"diff_con_{variable}"
+              ]
+          )
+          result = concat([result, tmp], axis=1)
+      if spiderweb:
+        radar=RadarHeatmap(result.loc[:,result.columns.str.contains('diff')],columns=result.loc[:,result.columns.str.contains('diff')].columns)
+        radar.plot(bw=0.1)
+      if plots:
+        dfx=result.loc[:,result.columns.str.contains('cat')]
+        ran=result.loc[:,result.columns.str.contains('range')][result.loc[:,result.columns.str.contains('range')].columns[0]]
+        ln=len(dfx.columns)
+        columns=dfx.columns
+        for i in range(0,ln,2):
+          plt.figure()
+          plt.plot(dfx[columns[i]],c='r',label=columns[i])
+          plt.plot(dfx[columns[i+1]],c='b',label=columns[i+1])
+          plt.xticks([i for i in range(len(ran))],ran, rotation=90)
+          plt.figlegend()
+
+      return result
+
+    def concentracionDiferencialRelativa(self, performanceCol:str, categories:list or tuple, divs=12, spiderweb=False, plots=False):
         from pandas import DataFrame,concat
         from matplotlib.pyplot import figure,xlim,title,xticks,figlegend, plot
-        rangos= [self.rangosPsicometrico(df=self.df[self.df[performanceCol]==categories[0]],divs=divs,setdf=True),
-                 self.rangosPsicometrico(df=self.df[self.df[performanceCol]==categories[1]],divs=divs,setdf=True)]
+        rangos= [self.rangosPsicometrico(df=self.df[self.df[performanceCol]==categories[0]],divs=divs,set_df=True),
+                 self.rangosPsicometrico(df=self.df[self.df[performanceCol]==categories[1]],divs=divs,set_df=True)]
         conc= [self.concentracionRangosPsico(rangos[0]),self.concentracionRangosPsico(rangos[1])]
         x= concat([conc[0].loc[:,conc[0].columns.str.contains('diff')],conc[1].loc[:,conc[1].columns.str.contains('diff')]],axis=0)
         x['cat']=[categories[0]]*len(conc[0])+[categories[1]]*len(conc[1])
@@ -559,14 +604,16 @@ class EDA:
         for idx,col in enumerate(cols):
           df[col+'_rangos']=conc[0].loc[:,col+'_rangos']
           y= [r[0] for r in df[col+'_rangos']]
-          df[col+'_diff']=abs(conc[0].loc[:,col+'_diff']-conc[1].loc[:,col+'_diff'])
-          if plot:
+          df[col+'_diff']=conc[0].loc[:,col+'_diff']-conc[1].loc[:,col+'_diff']
+          df[col+'_'+categories[0]+'_diff']=conc[0].loc[:,col+'_diff']
+          df[col+'_'+categories[1]+'_diff']=conc[1].loc[:,col+'_diff']
+          if plots:
             figure()
             plot(y,x.loc[x['cat']==categories[0],col+'_diff'], c='r', label=categories[0])
             plot(y,x.loc[x['cat']==categories[1],col+'_diff'], c='b', label=categories[1])
             xticks(y,conc[0].loc[:,col+'_rangos'],rotation=90)
             title(col)
-            xlim(-1,91)
+            xlim(-1,100)
             figlegend()
           diffCols.append(col+'_diff')
         if spiderweb:
@@ -574,21 +621,41 @@ class EDA:
           radar.plot(bw=0.1)
         return df
 
-    def graficarPsicometrico(self, columns:list): 
-        radar=RadarHeatmap(self.df[~self.df['perfil'].isna()] , columns=columns)
+    def graficarPsicometrico(self, columns:list, nec:str='perfil'):
+        radar=RadarHeatmap(self.df[~self.df[nec].isna()] , columns=columns)
         radar.plot(bw=0.1)
 
-    def normalityTest(self,columns: list or str):
-      from scipy.stats import shapiro
-      return shapiro(self.df[columns].T,axis=1).statistic
+    def topPerfiles(self, rows:int=5, superpoder:bool=True, ignore_nans:bool=True):
+        cols=['perfil'] if not superpoder else ['perfil','superpoder']
+        cons=self.df[cols].value_counts(dropna=ignore_nans).reset_index(drop=False)
+        cons['%']=self.df[cols].value_counts(dropna=ignore_nans,normalize=True).reset_index(drop=False)['proportion'].round(4)*100
+        return cons.head(rows)
 
-    def bimodalityTest(self,columns: list or str):
-      from scipy.stats import kurtosis
-      from pandas import DataFrame
-      g2 = self.df[columns].skew()
-      g3 = kurtosis(self.df[columns],fisher=False)
-      BC = (g3 + 1) / (g2**2 + 3)
-      df=DataFrame(BC).T
-      df.columns=columns
-      return df
+    def avg_median(self,columns: list or str,nec:str='perfil'):
+        df=self.df[~self.df['perfil'].isna()][columns]
+        return df.describe().T[['mean','50%']]
+
+    def low_mid_high_proportions(self):
+      from seaborn import kdeplot
+      from matplotlib.pyplot import figure,xlim,title
+      cols_psico=[ 'r', 'e', 'p', 'n', 'a',
+       'iniciativa', 'inteligenciasocial', 'influencia', 'autonomia',
+       'desarrollo', 'orientacionservicio', 'diplomacia', 'disponibilidad',
+       'precision', 'atencionfocalizada', 'pensamientoanalitico', 'exctecnica',
+       'implementacion', 'expeditividad', 'determinacion', 'agentecambio']
+      everything=[]
+      for column in cols_psico:
+        x=self.df.loc[~self.df[column].isna(),column] 
+        step=33
+        sums=[]
+        for i in range(0,98,step):
+              upper_b=i+step if i+step<98 else 101
+              counts=x.value_counts(normalize=True)*100
+              consult=counts.loc[(counts.index<upper_b) & (counts.index>=i)]
+              sums.append(((i,upper_b-1),(consult.sum())))
+        sums2=[i[1].round(1) for i in sums]
+        idxs=[i[0] for i in sums]
+        everything.append((column,sums))
+      return self.concentracionRangosPsico(everything)
+
 
