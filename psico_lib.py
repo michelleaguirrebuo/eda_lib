@@ -7,7 +7,7 @@ Original file is located at
     https://colab.research.google.com/drive/19i2EmRS_LhRphtv9xxJWOlgP6rA1o9_8
 """
 
-class Psicometrico():
+class Psicometrico:
 
     def __init__(self, file:str='', sheet:str or int=0, set_df:bool=False, df=None):
         '''
