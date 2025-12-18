@@ -382,9 +382,9 @@ class EDA:
           unq=self.df[column].unique() if ignore_nans else self.df[~self.df[column].isna()][column].unique()
         else:
           unq=customOrder+[nan] if not ignore_nans else customOrder
-          for u in unq:
-            dct={ui:(1 if ui==u else 0) for ui in unq}
-            self.df[u]=self.df[column].map(dct)
+        for u in unq:
+          dct={ui:(1 if ui==u else 0) for ui in unq}
+          self.df[column+'_encoded_'+str(u)]=self.df[column].map(dct)
 
     def edad(self,column:str, fecha_corte:str='', fmt:str='Y', returnColumn:str='Edad'):
         '''
